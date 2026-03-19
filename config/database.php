@@ -2,7 +2,7 @@
 <?php
 // Database configuration
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
+define('DB_USER', 'msingico_wifi_billing');
 define('DB_PASS', 'wifi_billing');
 define('DB_NAME', 'msingico_wifi_billing');
 
