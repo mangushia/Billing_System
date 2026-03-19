@@ -3,8 +3,8 @@
 // Database configuration
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'wifi_billing');
+define('DB_PASS', 'wifi_billing');
+define('DB_NAME', 'msingico_wifi_billing');
 
 // Create connection with error handling
 try {
