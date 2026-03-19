@@ -1,7 +1,7 @@
 <?php
 // Database configuration - UPDATED with your credentials
 define('DB_HOST', 'localhost');
-define('DB_USER', 'msingico');  // Your cPanel username
+define('DB_USER', 'msingico_wifi_billing');  // Your cPanel username
 define('DB_PASS', 'wifi_billing'); // Your database password
 define('DB_NAME', 'msingico_wifi_billing'); // Your database name
 
