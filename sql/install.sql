@@ -1,16 +1,11 @@
-  
 -- Ardthon Solutions WiFi Billing System Database
 -- Version 1.0
 
--- Create database
-CREATE DATABASE IF NOT EXISTS wifi_billing 
-CHARACTER SET utf8mb4 
-COLLATE utf8mb4_unicode_ci;
-
-USE wifi_billing;
+-- Use the existing database (don't try to create it)
+USE msingico_wifi_billing;
 
 -- Users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -26,10 +21,10 @@ CREATE TABLE users (
     INDEX idx_email (email),
     INDEX idx_phone (phone),
     INDEX idx_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Packages table
-CREATE TABLE packages (
+CREATE TABLE IF NOT EXISTS packages (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     description TEXT,
@@ -45,10 +40,10 @@ CREATE TABLE packages (
     INDEX idx_price (price),
     INDEX idx_status (status),
     INDEX idx_duration (duration, duration_unit)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Transactions table
-CREATE TABLE transactions (
+CREATE TABLE IF NOT EXISTS transactions (
     id INT PRIMARY KEY AUTO_INCREMENT,
     transaction_id VARCHAR(50) UNIQUE NOT NULL,
     user_id INT,
@@ -72,10 +67,10 @@ CREATE TABLE transactions (
     INDEX idx_mpesa_code (mpesa_code),
     INDEX idx_status (status),
     INDEX idx_created_at (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Vouchers table
-CREATE TABLE vouchers (
+CREATE TABLE IF NOT EXISTS vouchers (
     id INT PRIMARY KEY AUTO_INCREMENT,
     code VARCHAR(50) UNIQUE NOT NULL,
     package_id INT NOT NULL,
@@ -92,10 +87,10 @@ CREATE TABLE vouchers (
     INDEX idx_code (code),
     INDEX idx_status (status),
     INDEX idx_expires_at (expires_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Sessions table (for MikroTik/Radius)
-CREATE TABLE sessions (
+CREATE TABLE IF NOT EXISTS sessions (
     id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50),
     voucher_id INT,
@@ -112,10 +107,10 @@ CREATE TABLE sessions (
     INDEX idx_mac (mac_address),
     INDEX idx_status (status),
     INDEX idx_session_id (session_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Settings table
-CREATE TABLE settings (
+CREATE TABLE IF NOT EXISTS settings (
     id INT PRIMARY KEY AUTO_INCREMENT,
     setting_key VARCHAR(100) UNIQUE NOT NULL,
     setting_value TEXT,
@@ -124,10 +119,10 @@ CREATE TABLE settings (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_key (setting_key)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Logs table
-CREATE TABLE logs (
+CREATE TABLE IF NOT EXISTS logs (
     id INT PRIMARY KEY AUTO_INCREMENT,
     log_type ENUM('payment', 'auth', 'system', 'error') NOT NULL,
     message TEXT,
@@ -138,14 +133,15 @@ CREATE TABLE logs (
     INDEX idx_type (log_type),
     INDEX idx_created_at (created_at),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert default admin user (password: admin123)
-INSERT INTO users (username, password, email, phone, full_name, role) VALUES
-('admin', '$2y$10$YourHashedPasswordHere', 'admin@ardthon.com', '254700000000', 'System Administrator', 'admin');
+-- Insert default admin user (password: admin123 - you should change this)
+-- The password hash below is for 'admin123'
+INSERT IGNORE INTO users (username, password, email, phone, full_name, role) VALUES
+('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@ardthon.com', '254700000000', 'System Administrator', 'admin');
 
 -- Insert default packages
-INSERT INTO packages (name, price, speed, duration, duration_unit, data_limit, description, sort_order) VALUES
+INSERT IGNORE INTO packages (name, price, speed, duration, duration_unit, data_limit, description, sort_order) VALUES
 ('Basic Hourly', 50, 2, 1, 'hours', 1, 'Perfect for quick browsing and emails', 1),
 ('Daily Surf', 100, 4, 24, 'hours', 5, 'Full day of browsing and social media', 2),
 ('Weekly Pro', 500, 8, 7, 'days', 20, 'Ideal for remote workers and students', 3),
@@ -154,7 +150,7 @@ INSERT INTO packages (name, price, speed, duration, duration_unit, data_limit, d
 ('Weekend Special', 200, 8, 48, 'hours', 15, 'Friday 6PM to Monday 6AM', 6);
 
 -- Insert default settings
-INSERT INTO settings (setting_key, setting_value, setting_type, description) VALUES
+INSERT IGNORE INTO settings (setting_key, setting_value, setting_type, description) VALUES
 ('site_name', 'Ardthon Solutions WiFi', 'text', 'Website name'),
 ('site_email', 'info@ardthon.com', 'text', 'Contact email'),
 ('site_phone', '+254700000000', 'text', 'Contact phone'),
@@ -167,12 +163,12 @@ INSERT INTO settings (setting_key, setting_value, setting_type, description) VAL
 ('maintenance_mode', 'false', 'boolean', 'Maintenance mode status');
 
 -- Create indexes for performance
-CREATE INDEX idx_transactions_composite ON transactions(status, created_at);
-CREATE INDEX idx_vouchers_composite ON vouchers(status, expires_at);
-CREATE INDEX idx_sessions_composite ON sessions(status, start_time);
+CREATE INDEX IF NOT EXISTS idx_transactions_composite ON transactions(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_vouchers_composite ON vouchers(status, expires_at);
+CREATE INDEX IF NOT EXISTS idx_sessions_composite ON sessions(status, start_time);
 
 -- Create view for revenue reports
-CREATE VIEW revenue_daily AS
+CREATE OR REPLACE VIEW revenue_daily AS
 SELECT 
     DATE(created_at) as date,
     COUNT(*) as transaction_count,
@@ -183,7 +179,7 @@ WHERE status = 'completed'
 GROUP BY DATE(created_at);
 
 -- Create view for active sessions
-CREATE VIEW active_sessions AS
+CREATE OR REPLACE VIEW active_sessions AS
 SELECT 
     s.*,
     v.code as voucher_code,
@@ -194,40 +190,13 @@ LEFT JOIN vouchers v ON s.voucher_id = v.id
 LEFT JOIN packages p ON v.package_id = p.id
 WHERE s.status = 'active';
 
--- Create triggers for automatic expiry
-DELIMITER //
-
-CREATE TRIGGER check_voucher_expiry
-BEFORE UPDATE ON vouchers
-FOR EACH ROW
-BEGIN
-    IF NEW.expires_at < NOW() AND NEW.status = 'active' THEN
-        SET NEW.status = 'expired';
-    END IF;
-END//
-
-CREATE TRIGGER update_session_on_logout
-BEFORE UPDATE ON sessions
-FOR EACH ROW
-BEGIN
-    IF NEW.status = 'closed' AND OLD.status = 'active' THEN
-        SET NEW.end_time = NOW();
-    END IF;
-END//
-
-DELIMITER ;
-
--- Insert sample data for testing
-INSERT INTO transactions (transaction_id, phone, amount, mpesa_code, package_id, status, created_at) VALUES
+-- Insert sample data for testing (optional)
+INSERT IGNORE INTO transactions (transaction_id, phone, amount, mpesa_code, package_id, status, created_at) VALUES
 ('TXN20240101001', '254712345678', 50.00, 'MPESA12345', 1, 'completed', NOW() - INTERVAL 1 DAY),
 ('TXN20240101002', '254723456789', 100.00, 'MPESA12346', 2, 'completed', NOW() - INTERVAL 12 HOUR),
 ('TXN20240101003', '254734567890', 500.00, 'MPESA12347', 3, 'pending', NOW() - INTERVAL 2 HOUR);
 
-INSERT INTO vouchers (code, package_id, status, expires_at, created_at) VALUES
+INSERT IGNORE INTO vouchers (code, package_id, status, expires_at, created_at) VALUES
 ('ARD123456', 1, 'active', NOW() + INTERVAL 1 DAY, NOW()),
 ('ARD789012', 2, 'active', NOW() + INTERVAL 7 DAY, NOW()),
 ('ARD345678', 3, 'used', NOW() - INTERVAL 1 DAY, NOW() - INTERVAL 2 DAY);
-
--- Grant privileges (adjust username and host as needed)
-GRANT ALL PRIVILEGES ON wifi_billing.* TO 'wifi_user'@'localhost' IDENTIFIED BY 'secure_password';
-FLUSH PRIVILEGES;
