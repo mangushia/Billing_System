@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ardthon Solutions - WiFi Hotspot Billing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00d4aa;
+            --primary-dark: #00b894;
+            --secondary: #1a1a2e;
+            --accent: #16213e;
+            --surface: #0f3460;
+            --text: #eaeaea;
+            --text-muted: #a0a0a0;
+            --success: #00d4aa;
+            --warning: #f39c12;
+            --error: #e74c3c;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 170, 0.1) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.8; }
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            border-radius: 50%;
+            left: 10%;
+            top: 20%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            border: 2px solid var(--primary);
+            right: 15%;
+            top: 60%;
+            animation-delay: 5s;
+        }
+
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            left: 70%;
+            top: 30%;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        /* Header */
+        .header {
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            background: var(--glass);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
+        }
+
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--glass);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            font-size: 0.875rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Pricing Cards */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .pricing-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .pricing-card:nth-child(1) { animation-delay: 0.1s; }
+        .pricing-card:nth-child(2) { animation-delay: 0.2s; }
+        .pricing-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 212, 170, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 212, 170, 0.2);
+        }
+
+        .pricing-card:hover::before {
+            opacity: 1;
+        }
+
+        .pricing-card.featured {
+            border: 2px solid var(--primary);
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+
+        .badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--primary);
+            color: var(--secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .plan-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .plan-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .plan-features li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .plan-features li::before {
+            content: '✓';
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .btn-select {
+            width: 100%;
+            padding: 1rem;
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-select:hover {
+            background: var(--primary);
+            color: var(--secondary);
+            transform: scale(1.02);
+        }
+
+        .pricing-card.featured .btn-select {
+            background: var(--primary);
+            color: var(--secondary);
+        }
+
+        .pricing-card.featured .btn-select:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 10px 30px rgba(0, 212, 170, 0.3);
+        }
+
+        /* Payment Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal {
+            background: var(--secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 450px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mpesa-logo {
+            width: 80px;
+            height: 80px;
+            background: #00a650;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: white;
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 166, 80, 0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(0, 166, 80, 0); }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+        }
+
+        .price-display {
+            background: var(--accent);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .price-display .amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .price-display .plan-name-display {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn-pay {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, #00a650 0%, #00d4aa 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 166, 80, 0.3);
+        }
+
+        .btn-pay:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-pay.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-pay.loading .btn-text {
+            display: none;
+        }
+
+        /* Success/Error States */
+        .status-message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-message.success {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            display: flex;
+        }
+
+        .status-message.error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            display: flex;
+        }
+
+        /* Connection Status Panel */
+        .connection-panel {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 3rem;
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .connection-panel.active {
+            display: block;
+        }
+
+        .connection-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .connection-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--success) 0%, var(--primary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .connection-info h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .connection-info p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .voucher-code {
+            background: var(--accent);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 1.5rem 0;
+            border: 2px dashed var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voucher-code::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(0, 212, 170, 0.1) 50%, transparent 70%);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .voucher-code .label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .voucher-code .code {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .timer-value {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--glass-border);
+            margin-top: 3rem;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+            
+            .pricing-card.featured:hover {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Input validation styles */
+        .form-group input.error {
+            border-color: var(--error);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .helper-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">📡</div>
+            <div class="logo-text">Ardthon Solutions</div>
+        </div>
+        <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span>Hotspot Active</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>Connect & Browse</h1>
+            <p>Choose your preferred internet package and pay instantly via M-Pesa. Fast, secure, and reliable connectivity for all your needs.</p>
+        </div>
+
+        <!-- Pricing Grid -->
+        <div class="pricing-grid">
+            <!-- Basic Plan -->
+            <div class="pricing-card">
+                <div class="plan-icon">⚡</div>
+                <div class="plan-name">Basic</div>
+                <div class="plan-price">KES 20<span>/1 hour</span></div>
+                <ul class="plan-features">
+                    <li>3 Mbps Speed</li>
+                    <li>500 MB Data</li>
+                    <li>1 Device</li>
+                    <li>Standard Support</li>
+                </ul>
+                <button class="btn-select" onclick="openPaymentModal('Basic', 20, '1 Hour', '3 Mbps', '500 MB')">Select Plan</button>
+            </div>
+
+            <!-- Standard Plan -->
+            <div class="pricing-card featured">
+                <span class="badge">POPULAR</span>
+                <div class="plan-icon">🚀</div>
+                <div class="plan-name">Standard</div>
+                <div class="plan-price">KES 50<span>/4 hours</span></div>
+                <ul class="plan-features">
+                    <li>10 Mbps Speed</li>
+                    <li>2 GB Data</li>
+                    <li>2 Devices</li>
+                    <li>Priority Support</li>
+                </ul>
+                <button class="btn-select" onclick="openPaymentModal('Standard', 50, '4 Hours', '10 Mbps', '2 GB')">Select Plan</button>
+            </div>
+
+            <!-- Premium Plan -->
+            <div class="pricing-card">
+                <div class="plan-icon">💎</div>
+                <div class="plan-name">Premium</div>
+                <div class="plan-price">KES 100<span>/24 hours</span></div>
+                <ul class="plan-features">
+                    <li>20 Mbps Speed</li>
+                    <li>Unlimited Data</li>
+                    <li>5 Devices</li>
+                    <li>24/7 Premium Support</li>
+                </ul>
+                <button class="btn-select" onclick="openPaymentModal('Premium', 100, '24 Hours', '20 Mbps', 'Unlimited')">Select Plan</button>
+            </div>
+        </div>
+
+        <!-- Connection Panel (Hidden by default) -->
+        <div class="connection-panel" id="connectionPanel">
+            <div class="connection-header">
+                <div class="connection-icon">✓</div>
+                <div class="connection-info">
+                    <h3>Payment Successful!</h3>
+                    <p>Your internet access is now active</p>
+                </div>
+            </div>
+            
+            <div class="voucher-code">
+                <div class="label">Your Access Code</div>
+                <div class="code" id="voucherCode">ARD-7X9K-2M4P</div>
+            </div>
+            
+            <div class="timer">
+                <span>⏱️</span>
+                <span>Time Remaining: <span class="timer-value" id="timeRemaining">04:00:00</span></span>
+            </div>
+            
+            <div style="margin-top: 1.5rem; padding: 1rem; background: var(--accent); border-radius: 10px; font-size: 0.875rem; color: var(--text-muted); text-align: center;">
+                <strong style="color: var(--primary);">Connection Details:</strong><br>
+                Network: <span id="networkName">Ardthon_WiFi</span> | 
+                Speed: <span id="connectionSpeed">10 Mbps</span> | 
+                Devices: <span id="deviceLimit">2</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closePaymentModal()">×</button>
+            
+            <div class="modal-header">
+                <div class="mpesa-logo">M</div>
+                <h2>M-Pesa Payment</h2>
+                <p style="color: var(--text-muted); font-size: 0.875rem;">Enter your M-Pesa number to receive STK push</p>
+            </div>
+
+            <div class="status-message" id="statusMessage">
+                <span id="statusIcon">✓</span>
+                <span id="statusText">Payment initiated successfully!</span>
+            </div>
+
+            <div class="price-display">
+                <div class="amount" id="modalAmount">KES 50</div>
+                <div class="plan-name-display" id="modalPlanName">Standard Plan - 4 Hours</div>
+            </div>
+
+            <form id="paymentForm" onsubmit="processPayment(event)">
+                <div class="form-group">
+                    <label for="phoneNumber">M-Pesa Phone Number</label>
+                    <input 
+                        type="tel" 
+                        id="phoneNumber" 
+                        placeholder="e.g., 254712345678" 
+                        maxlength="12"
+                        required
+                    >
+                    <div class="helper-text">Format: 2547XX XXX XXX (Safaricom number)</div>
+                </div>
+
+                <button type="submit" class="btn-pay" id="payButton">
+                    <span class="spinner"></span>
+                    <span class="btn-text">Pay with M-Pesa</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2026 Ardthon Solutions. Powered by <a href="#">Safaricom Daraja API</a></p>
+        <p style="margin-top: 0.5rem; font-size: 0.75rem;">Secure payments | Instant activation | 24/7 Support</p>
+    </footer>
+
+    <script>
+        // Configuration
+        const DARAJA_CONFIG = {
+            // These would be your actual Daraja API credentials
+            consumerKey: 'YOUR_CONSUMER_KEY',
+            consumerSecret: 'YOUR_CONSUMER_SECRET',
+            shortCode: 'YOUR_SHORTCODE',
+            passKey: 'YOUR_PASSKEY',
+            callbackUrl: 'https://ardthon.co.ke/api/callback',
+            environment: 'sandbox' // Change to 'production' for live
+        };
+
+        let currentPlan = null;
+        let paymentCheckInterval = null;
+
+        // Open Payment Modal
+        function openPaymentModal(planName, amount, duration, speed, data) {
+            currentPlan = { name: planName, amount, duration, speed, data };
+            
+            document.getElementById('modalAmount').textContent = `KES ${amount}`;
+            document.getElementById('modalPlanName').textContent = `${planName} Plan - ${duration}`;
+            document.getElementById('paymentModal').classList.add('active');
+            document.getElementById('statusMessage').className = 'status-message';
+            document.getElementById('paymentForm').reset();
+        }
+
+        // Close Payment Modal
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+            clearInterval(paymentCheckInterval);
+        }
+
+        // Validate Phone Number
+        function validatePhoneNumber(phone) {
+            // Kenyan number format: 2547XX XXX XXX or 07XX XXX XXX
+            const cleaned = phone.replace(/\s/g, '');
+            const regex = /^(2547\d{8}|07\d{8})$/;
+            return regex.test(cleaned);
+        }
+
+        // Format Phone Number
+        function formatPhoneNumber(phone) {
+            const cleaned = phone.replace(/\s/g, '');
+            if (cleaned.startsWith('0')) {
+                return '254' + cleaned.substring(1);
+            }
+            return cleaned;
+        }
+
+        // Generate Voucher Code
+        function generateVoucherCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = 'ARD-';
+            for (let i = 0; i < 4; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            code += '-';
+            for (let i = 0; i < 4; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // Process Payment
+        async function processPayment(event) {
+            event.preventDefault();
+            
+            const phoneInput = document.getElementById('phoneNumber');
+            const phone = phoneInput.value.trim();
+            const payButton = document.getElementById('payButton');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // Validation
+            if (!validatePhoneNumber(phone)) {
+                phoneInput.classList.add('error');
+                showStatus('error', 'Please enter a valid Safaricom number (e.g., 254712345678)');
+                setTimeout(() => phoneInput.classList.remove('error'), 500);
+                return;
+            }
+            
+            phoneInput.classList.remove('error');
+            
+            // Show loading
+            payButton.classList.add('loading');
+            payButton.disabled = true;
+            
+            const formattedPhone = formatPhoneNumber(phone);
+            
+            try {
+                // Simulate Daraja API STK Push
+                // In production, this would be:
+                // 1. Get OAuth token from Daraja
+                // 2. Initiate STK Push via /mpesa/stkpush/v1/processrequest
+                // 3. Poll for payment status
+                
+                await simulateSTKPush(formattedPhone, currentPlan.amount);
+                
+                showStatus('success', 'STK Push sent! Check your phone to complete payment...');
+                
+                // Simulate payment confirmation polling
+                let attempts = 0;
+                paymentCheckInterval = setInterval(async () => {
+                    attempts++;
+                    
+                    // Simulate successful payment after 3 seconds
+                    if (attempts >= 3) {
+                        clearInterval(paymentCheckInterval);
+                        await completePayment();
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                showStatus('error', 'Failed to initiate payment. Please try again.');
+                payButton.classList.remove('loading');
+                payButton.disabled = false;
+            }
+        }
+
+        // Simulate STK Push (Replace with actual Daraja API call)
+        async function simulateSTKPush(phone, amount) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    console.log(`STK Push initiated to ${phone} for KES ${amount}`);
+                    resolve();
+                }, 1500);
+            });
+        }
+
+        // Actual Daraja API Implementation (Commented for reference)
+        /*
+        async function initiateSTKPush(phone, amount) {
+            // Step 1: Get Access Token
+            const auth = btoa(`${DARAJA_CONFIG.consumerKey}:${DARAJA_CONFIG.consumerSecret}`);
+            const tokenResponse = await fetch('https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials', {
+                headers: { 'Authorization': `Basic ${auth}` }
+            });
+            const { access_token } = await tokenResponse.json();
+            
+            // Step 2: Generate Password and Timestamp
+            const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, -3);
+            const password = btoa(`${DARAJA_CONFIG.shortCode}${DARAJA_CONFIG.passKey}${timestamp}`);
+            
+            // Step 3: Initiate STK Push
+            const stkPayload = {
+                BusinessShortCode: DARAJA_CONFIG.shortCode,
+                Password: password,
+                Timestamp: timestamp,
+                TransactionType: 'CustomerPayBillOnline',
+                Amount: amount,
+                PartyA: phone,
+                PartyB: DARAJA_CONFIG.shortCode,
+                PhoneNumber: phone,
+                CallBackURL: DARAJA_CONFIG.callbackUrl,
+                AccountReference: `Ardthon_${currentPlan.name}`,
+                TransactionDesc: `WiFi ${currentPlan.name} Plan`
+            };
+            
+            const stkResponse = await fetch('https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(stkPayload)
+            });
+            
+            return await stkResponse.json();
+        }
+        */
+
+        // Complete Payment
+        async function completePayment() {
+            const voucherCode = generateVoucherCode();
+            
+            // Close modal
+            closePaymentModal();
+            
+            // Show connection panel
+            const panel = document.getElementById('connectionPanel');
+            document.getElementById('voucherCode').textContent = voucherCode;
+            document.getElementById('networkName').textContent = 'Ardthon_WiFi';
+            document.getElementById('connectionSpeed').textContent = currentPlan.speed;
+            document.getElementById('deviceLimit').textContent = currentPlan.name === 'Basic' ? '1' : currentPlan.name === 'Standard' ? '2' : '5';
+            
+            // Parse duration for timer
+            let hours = 1;
+            if (currentPlan.duration.includes('4')) hours = 4;
+            if (currentPlan.duration.includes('24')) hours = 24;
+            
+            startTimer(hours * 60 * 60); // Convert to seconds
+            
+            panel.classList.add('active');
+            
+            // Scroll to connection panel
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Reset button
+            const payButton = document.getElementById('payButton');
+            payButton.classList.remove('loading');
+            payButton.disabled = false;
+            
+            // In production: Activate voucher in hotspot system (MikroTik/ChilliSpot, etc.)
+            console.log(`Voucher ${voucherCode} activated for ${currentPlan.name} plan`);
+        }
+
+        // Show Status Message
+        function showStatus(type, message) {
+            const statusEl = document.getElementById('statusMessage');
+            const iconEl = document.getElementById('statusIcon');
+            const textEl = document.getElementById('statusText');
+            
+            statusEl.className = `status-message ${type}`;
+            iconEl.textContent = type === 'success' ? '✓' : '✕';
+            textEl.textContent = message;
+        }
+
+        // Timer Countdown
+        function startTimer(seconds) {
+            const display = document.getElementById('timeRemaining');
+            let remaining = seconds;
+            
+            const interval = setInterval(() => {
+                remaining--;
+                
+                const hrs = Math.floor(remaining / 3600);
+                const mins = Math.floor((remaining % 3600) / 60);
+                const secs = remaining % 60;
+                
+                display.textContent = 
+                    `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    display.textContent = 'EXPIRED';
+                    display.style.color = 'var(--error)';
+                }
+            }, 1000);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('paymentModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closePaymentModal();
+            }
+        });
+
+        // Input formatting
+        document.getElementById('phoneNumber').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 12) value = value.slice(0, 12);
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>
