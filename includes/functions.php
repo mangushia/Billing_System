@@ -1,8 +1,12 @@
-  
 <?php
+// Enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // General Functions
 
 function sanitizeInput($data) {
+    if ($data === null) return '';
     $data = trim($data);
     $data = stripslashes($data);
     $data = htmlspecialchars($data);
@@ -10,11 +14,20 @@ function sanitizeInput($data) {
 }
 
 function getPackages($conn) {
-    $sql = "SELECT * FROM packages WHERE status = 'active' ORDER BY price ASC";
-    $result = $conn->query($sql);
     $packages = [];
-    while($row = $result->fetch_assoc()) {
-        $packages[] = $row;
+    try {
+        $sql = "SELECT * FROM packages WHERE status = 'active' ORDER BY price ASC";
+        $result = $conn->query($sql);
+        
+        if ($result) {
+            while($row = $result->fetch_assoc()) {
+                $packages[] = $row;
+            }
+        } else {
+            error_log("Error in getPackages: " . $conn->error);
+        }
+    } catch (Exception $e) {
+        error_log("Exception in getPackages: " . $e->getMessage());
     }
     return $packages;
 }
@@ -39,17 +52,10 @@ function formatPhoneNumber($phone) {
     return $phone;
 }
 
-function sendSMS($phone, $message) {
-    // Implement SMS sending logic (e.g., Africa's Talking, Twilio)
-    // This is a placeholder
-    error_log("SMS to $phone: $message");
-    return true;
-}
-
 function generateVoucherCode() {
     $characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    $code = VOUCHER_PREFIX;
-    for($i = 0; $i < VOUCHER_LENGTH; $i++) {
+    $code = '';
+    for($i = 0; $i < 8; $i++) {
         $code .= $characters[rand(0, strlen($characters) - 1)];
     }
     return $code;
@@ -73,9 +79,16 @@ function displayMessage($message, $type = 'success') {
 }
 
 function logError($error) {
-    $logFile = 'logs/errors.log';
+    $logFile = __DIR__ . '/../logs/errors.log';
     $timestamp = date('Y-m-d H:i:s');
     $logMessage = "[$timestamp] $error" . PHP_EOL;
+    
+    // Create logs directory if it doesn't exist
+    $logDir = dirname($logFile);
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0777, true);
+    }
+    
     file_put_contents($logFile, $logMessage, FILE_APPEND);
 }
 
